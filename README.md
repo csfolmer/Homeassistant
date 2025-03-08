@@ -1,2 +1,2 @@
-# Homeassitant
-here some home assitant stuf I use or made
+# Homeassistant
+here some home assistant stuf I use or made
