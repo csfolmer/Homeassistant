@@ -1,0 +1,56 @@
+entities:
+  - entity: media_player.benedengroep
+    icon: mdi:sofa
+    min_volume: 5
+    name: beneden audio
+    type: custom:mini-media-player
+    info: scroll
+    source: full
+    hide:
+      volume: false
+      source: false
+      power_state: false
+      name: false
+      icon: false
+      info: false
+    shortcuts:
+      columns: 4
+      buttons:
+        - title: Radio 2
+          image: >-
+            https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/NPO_Radio_2_logo.svg/640px-NPO_Radio_2_logo.svg.png
+          type: radio
+          id: http://icecast.omroep.nl/radio2-bb-mp3
+        - name: Radio 10
+          image: >-
+            https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScXQ3C4MdB2iKNRXVmQSy-fl3MBqAi-SX2JU3p-ZeLSiLCVbDw&s
+          type: playlist
+          id: >-
+            http://playerservices.streamtheworld.com/api/livestream-redirect/RADIO10.mp3
+        - name: Qmusic
+          image: https://qmusic.nl/favicon.ico
+          type: playlist
+          id: https://icecast-qmusicnl-cdp.triple-it.nl/Qmusic_nl_live_96.mp3
+        - name: Nonstop grootnieuws
+          image: >-
+            https://new-api.grootnieuwsradio.nl/cache/i/0/images/3.w80.r1-1.5749681.q90.webp
+          type: playlist
+          id: https://27863.live.streamtheworld.com/GNRNONSTOP.mp3
+        - name: Groot nieuws
+          image: https://www.grootnieuwsradio.nl/favicons/favicon-1-180x180.png
+          type: playlist
+          id: >-
+            https://playerservices.streamtheworld.com/api/livestream-redirect/GNR.mp3
+        - name: Radio 5
+          image: https://www.nporadio5.nl/apple-touch-icon.png
+          type: radio
+          id: https://icecast.omroep.nl/radio5-bb-mp3
+        - name: Blijde klanken
+          image: >-
+            https://new-api.grootnieuwsradio.nl/cache/i/0/images/5.w80.r1-1.0db0463.q90.webp
+          type: radio
+          id: >-
+            https://playerservices.streamtheworld.com/api/livestream-redirect/GNRBK.mp3
+show_header_toggle: false
+type: entities
+state_color: true
