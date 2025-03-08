@@ -1,0 +1,51 @@
+type: custom:mushroom-template-badge
+content: |
+  👋🏼 Hi {{ user }}, 
+
+    {% set dagen = {
+
+    'Monday': 'maandag',
+
+    'Tuesday': 'dinsdag',
+
+    'Wednesday': 'woensdag',
+
+    'Thursday': 'donderdag',
+
+    'Friday': 'vrijdag',
+
+    'Saturday': 'zaterdag',
+
+    'Sunday': 'zondag'
+
+    } %}
+
+    {% set temp = states('sensor.openweathermap_temperature', 'temperature') %} {%
+    set feel = states('sensor.openweathermap_feels_like_temperature',
+    'temperature_unit') %} {% set unit = state_attr('weather.openweathermap',
+    'temperature_unit') %}
+
+    het is vandaag {{ dagen[now().strftime('%A')] }},
+
+    {{ 
+      {
+        'clear-night': "🌙 De nachtelijke hemel is kristalhelder, perfect om naar de sterren te kijken! Een koele " ~ temp ~ unit ~ " (gevoel " ~ feel ~ unit ~ ") maakt het nog beter.",
+        'cloudy': "☁️ De wolken hebben de hemel overgenomen. Geen zon voorlopig! Met " ~ temp ~ unit ~ " (gevoel " ~ feel ~ unit ~ ") voelt het misschien een beetje somber.",
+        'fog': "🌫️ Het is super mistig buiten! Voelt als een scène uit een mysteriefilm. De temperatuur is " ~ temp ~ unit ~ " (gevoel " ~ feel ~ unit ~ "), dus blijf lekker warm!",
+        'hail': "❄️⚡ Hagelstenen vallen uit de lucht—pas op je hoofd! En met " ~ temp ~ unit ~ " (gevoel " ~ feel ~ unit ~ ") is het zeker een koude dag.",
+        'lightning': "⚡ Boem! Krak! Onweersbuien geven een lichtshow. Bij " ~ temp ~ unit ~ " (gevoel " ~ feel ~ unit ~ ") is het een behoorlijk dramatische scène!",
+        'lightning-rainy': "⛈️ Donder, bliksem en regen—de manier van de natuur om lawaai te maken! De temperatuur is " ~ temp ~ unit ~ " (gevoel " ~ feel ~ unit ~ "), dus blijf warm en droog.",
+        'partlycloudy': "⛅ Een mix van zon en wolken—de natuur kan vandaag niet beslissen! Bij " ~ temp ~ unit ~ " (gevoel " ~ feel ~ unit ~ ") is het een dag voor laagjes!",
+        'pouring': "🌧️💦 Het regent pijpenstelen! Tijd om die regenjas te testen! De temperatuur is " ~ temp ~ unit ~ " (gevoel " ~ feel ~ unit ~ "), dus kleed je er naar.",
+        'rainy': "☔ Regendruppels blijven vallen—pak je paraplu! Met " ~ temp ~ unit ~ " (gevoel " ~ feel ~ unit ~ ") is het misschien een gezellige thee-en-deken-dag.",
+        'snowy': "❄️ De wereld verandert in een winterwonderland! Bij " ~ temp ~ unit ~ " (gevoel " ~ feel ~ unit ~ ")is het zeker tijd voor warme chocolademelk!",
+        'snowy-rainy': "🌨️🌧️ Sneeuw en regen werken samen voor een rommelige weerdag! De temperatuur is " ~ temp ~ unit ~ " (gevoel " ~ feel ~ unit ~ "), dus kleed je op alles!",
+        'sunny': "☀️ De zon schijnt helder—vergeet je zonnebril niet! Bij " ~ temp ~ unit ~ " (gevoel " ~ feel ~ unit ~ ") is het de perfecte dag om buiten te zijn!",
+        'windy': "💨 Houd je hoed vast! De wind huilt vandaag! De temperatuur is " ~ temp ~ unit ~ " (gevoel " ~ feel ~ unit ~ "), waardoor het nog sterker aanvoelt!",
+        'windy-variant': "🌬️💨 Het is winderig en bewolkt—bereid je voor op een stormachtige dag! Met " ~ temp ~ unit ~ " (gevoel " ~ feel ~ unit ~ ") is het een goede dag voor een warme jas.",
+        'exceptional': "🌪️🌊 Extreem weer alert! Blijf veilig en wees voorbereid! Bij " ~ temp ~ unit ~ " (gevoel " ~ feel ~ unit ~ ") kunnen de omstandigheden onvoorspelbaar zijn!"
+      }
+      
+      [states('weather.openweathermap') | default('sunny')]
+     
+    }}
