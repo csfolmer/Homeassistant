@@ -1,0 +1,626 @@
+- id: '1610740153553'
+  alias: thermostaat 21:00 uit
+  description: ''
+  trigger:
+  - platform: time
+    at: '21:00:00'
+  condition: []
+  action:
+  - device_id: 11804e1df2b36eb39ae36497332d3564
+    domain: climate
+    entity_id: climate.thermostat
+    type: set_preset_mode
+    preset_mode: sleep
+  mode: single
+- id: '1610803395609'
+  alias: woonkamer aan om zonondergang
+  description: ''
+  triggers:
+  - event: sunset
+    offset: -00:05:00
+    trigger: sun
+  conditions: []
+  actions:
+  - target:
+      entity_id:
+      - light.woonkamer_verlichting
+      - light.keuken_verlichting
+    data: {}
+    action: light.turn_on
+  mode: single
+- id: '1610804094336'
+  alias: verlichting uit om 22:30
+  description: ''
+  triggers:
+  - at: '22:55:00'
+    trigger: time
+  conditions: []
+  actions:
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.woonkamer_verlichting
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.keuken_verlichting
+  mode: single
+- id: '1610963842222'
+  alias: tuin verlichting uit bij zonopgang
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: -00:45:00
+  - platform: time
+    at: 08:30:00
+  - platform: time
+    at: 01:00:00
+  condition: []
+  action:
+  - scene: scene.tuin_verlichting
+  mode: single
+- id: '1610963842333'
+  alias: tuin verlichting aan bij zonondergang
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+  - platform: time
+    at: 06:30:00
+    enabled: false
+  condition: []
+  action:
+  - scene: scene.tuin_verlichting_aan
+  mode: single
+- id: '1614943546826'
+  alias: Hal licht auto aan en uit
+  description: ''
+  use_blueprint:
+    path: networkingcat/motion_automation_switch.yaml
+    input:
+      motion_entity: binary_sensor.sonoff_a480086571
+      no_motion_wait: 20
+      elevation_check: 2
+      light_target:
+        entity_id: switch.sonoff_100108c3d0_1
+      time_scene_night: 00:00:00
+      time_scene_evening: 00:00:00
+      time_scene_day: 00:00:00
+      time_scene_morning: 00:00:00
+- id: '1615321695772'
+  alias: Wasmachine klaar
+  description: ''
+  use_blueprint:
+    path: sbyx/notify-or-do-something-when-an-appliance-like-a-dishwasher-or-washing-machine-finishes.yaml
+    input:
+      power_sensor: sensor.fritz_smart_energy_200_1_vermogen
+      actions:
+      - device_id: 5ba6a31176bad7a8ca6d7ef95b452ba0
+        domain: mobile_app
+        type: notify
+        title: wasmachine klaar
+        message: De wasmachine is klaar
+      - device_id: 83d36b1108d54a111b947a14cce43e5f
+        domain: mobile_app
+        type: notify
+        message: Wasmachine is klaar
+        title: Wasmachine is klaar
+      - action: notify.hacsfolmer
+        data:
+          message: De wasmachine is klaar dus de schone was kan opgehangen of in de
+            droger gedaan worden.
+          title: De Was!!
+      finishing_hysteresis: 2
+      starting_hysteresis: 2
+      finishing_threshold: 3
+- id: '1615392016304'
+  alias: Droger klaar
+  description: ''
+  use_blueprint:
+    path: sbyx/notify-or-do-something-when-an-appliance-like-a-dishwasher-or-washing-machine-finishes.yaml
+    input:
+      power_sensor: sensor.fritz_smart_energy_200_2_vermogen
+      starting_hysteresis: 3
+      actions:
+      - device_id: 5ba6a31176bad7a8ca6d7ef95b452ba0
+        domain: mobile_app
+        type: notify
+        title: Droger klaar
+        message: De droger is klaar!
+      - device_id: 83d36b1108d54a111b947a14cce43e5f
+        domain: mobile_app
+        type: notify
+        message: Droger is klaar
+        title: Droger is klaar
+      - action: notify.hacsfolmer
+        data:
+          message: De droger is klaar en kan uitgeruimd worden
+          title: De Was!!
+      finishing_hysteresis: 2
+- id: '1617913266477'
+  alias: Watch batterij management
+  description: ''
+  use_blueprint:
+    path: seamus65/wallpanel-battery-management.yaml
+    input:
+      battery: sensor.pixel_watch_3_battery_level
+      charger: switch.sonoff_1000fb47f1
+      charged_percent: 99
+      low_percent: 44
+- id: '1619703060006'
+  alias: ' Badkamer op 21 graden'
+  description: ''
+  use_blueprint:
+    path: nevesenin/target_temperature_adjustment.yaml
+    input:
+      temperature_sensor: sensor.badkamer_temperature
+      thermostat: climate.tado_smart_radiator_thermostat_va1426334976
+- id: '1639333278969'
+  alias: trap aan en uit
+  description: ''
+  use_blueprint:
+    path: networkingcat/motion_automation_switch.yaml
+    input:
+      motion_entity: binary_sensor.sonoff_a4800208e8
+      light_target:
+        entity_id: switch.sonoff_1000fbc1d8
+      no_motion_wait: 20
+      no_motion_blocker_boolean: true
+- id: '1658726373526'
+  alias: Waskamer rolluik open
+  description: ''
+  trigger:
+  - platform: time
+    at: 08:15:00
+  condition: []
+  action:
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.waskamer
+  mode: single
+- id: '1658730187722'
+  alias: Waskamer rolluik dicht
+  description: ''
+  trigger:
+  - platform: time
+    at: '14:00:00'
+  condition: []
+  action:
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.waskamer
+  mode: single
+- id: '1658809887099'
+  alias: woonkamer rolluik open
+  description: ''
+  trigger:
+  - platform: time
+    at: '19:35:00'
+  condition: []
+  action:
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.woonkamer_rolluik
+  mode: single
+- id: '1658810036563'
+  alias: woonkamer rolluik dicht
+  description: ''
+  trigger:
+  - platform: time
+    at: '11:30:00'
+  condition: []
+  action:
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id: cover.woonkamer_rolluik
+  mode: single
+- id: '1658810192717'
+  alias: woonkamer gordijn open
+  description: ''
+  trigger:
+  - platform: time
+    at: '20:54:00'
+  condition: []
+  action:
+  - service: motion_blinds.set_absolute_position
+    data:
+      absolute_position: 95
+    target:
+      entity_id:
+      - cover.rollershutter_0002
+      - cover.rollershutter_0001
+  mode: single
+- id: '1658810228478'
+  alias: woonkamer gordijn dicht
+  description: ''
+  trigger:
+  - platform: time
+    at: '14:10:00'
+  condition: []
+  action:
+  - service: motion_blinds.set_absolute_position
+    data: {}
+    target:
+      entity_id:
+      - cover.rollershutter_0001
+      - cover.rollershutter_0002
+  mode: single
+- id: '1659029997491'
+  alias: vincent rolluik open
+  description: ''
+  trigger:
+  - platform: time
+    at: '11:35:00'
+  condition: []
+  action:
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.slaapkamer_vincent
+  mode: single
+- id: '1659030112577'
+  alias: Vincent rolluik dicht
+  description: ''
+  trigger:
+  - platform: time
+    at: '20:45:00'
+  condition: []
+  action:
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.slaapkamer_vincent
+  mode: single
+- id: '1659039080714'
+  alias: 'slaapkamer k&L rolluik dicht '
+  description: ''
+  trigger:
+  - platform: time
+    at: '13:05:00'
+  condition: []
+  action:
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id: cover.slaapkamer_k_l
+  mode: single
+- id: '1659039210392'
+  alias: slaapkamer K&L rolluik open
+  description: ''
+  trigger:
+  - platform: time
+    at: 08:20:00
+  condition: []
+  action:
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.slaapkamer_k_l
+  mode: single
+- id: '1671475504719'
+  alias: kerst verlichting bij zonondergang aan
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: -00:05:00
+  condition: []
+  action:
+  - service: script.turn_on
+    target:
+      entity_id:
+      - script.kerst_verlichting_aan
+    data: {}
+  mode: single
+- id: '1687460053784'
+  alias: zwembadpomp aan
+  description: ''
+  trigger:
+  - platform: time
+    at: 08:30:00
+  - platform: time
+    at: '11:30:00'
+  - platform: time
+    at: '18:30:00'
+    enabled: true
+  condition: []
+  action:
+  - service: script.zwembad_pomp_aan
+    metadata: {}
+    data: {}
+  mode: single
+- id: '1707559219333'
+  alias: Vaatwasser uitruimen
+  description: ''
+  triggers:
+  - entity_id:
+    - sensor.vaatwasser_operation_state
+    from: finished
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    trigger: state
+    to: ready
+  conditions: []
+  actions:
+  - action: notify.mobile_app_kees_mobiel
+    data:
+      message: vaatwasser is klaar en mag uitgeruimd worden
+      data:
+        notification_icon: mdi:dishwasher-alert
+  - action: notify.mobile_app_linda_samsung
+    data:
+      message: vaatwasser is klaar en mag uitgeruimd worden
+      data:
+        notification_icon: mdi:dishwasher-alert
+  - action: notify.HAcsfolmer
+    data:
+      message: vaatwasser is klaar en mag uitgeruimd worden
+      title: Vaatwasser
+      data:
+        channel: vaatwasser
+  mode: single
+- id: '1714408429894'
+  alias: vaatwasser aan en deur open
+  description: ''
+  triggers:
+  - entity_id:
+    - sensor.vaatwasser_deur
+    from: 'off'
+    to: 'on'
+    trigger: state
+  conditions:
+  - condition: state
+    entity_id: sensor.vaatwasser_operation_state
+    state: Run
+  actions:
+  - data:
+      message: Vaatwasser is open en mag uitgeruimd worden
+    action: notify.mobile_app_kees_mobiel
+  - data:
+      message: vaatwasser is open en mag uitgeruimd worden
+    action: notify.mobile_app_linda_samsung
+  mode: single
+- id: '1717221095700'
+  alias: automatische update HA
+  description: ''
+  trigger:
+  - platform: time
+    at: 04:00:00
+  condition: []
+  action:
+  - service: script.run_auto_updates
+    metadata: {}
+    data: {}
+  mode: single
+- id: '1717754665347'
+  alias: zwembadpomp uit
+  description: ''
+  trigger:
+  - platform: time
+    at: 09:30:00
+  - platform: time
+    at: '13:00:00'
+  - platform: time
+    at: '20:45:00'
+    enabled: true
+  condition: []
+  action:
+  - service: script.zwembad_pomp_uit
+    data: {}
+  mode: single
+- id: '1725556522496'
+  alias: Deur bel!
+  description: Er wordt aan de deur gebeld
+  triggers:
+  - type: running
+    device_id: e35a15c9060167a704dece95d1129233
+    entity_id: a9581780d468914e5da467994826e79f
+    domain: binary_sensor
+    trigger: device
+  conditions: []
+  actions:
+  - action: notify.mobile_app_kees_mobiel
+    data:
+      message: Er wordt aangebeld bij de voordeur
+      title: Voordeur bel
+      data:
+        vibrationPattern: 100, 1000, 100, 1000, 100
+        channel: deurbel
+        color: red
+        notification_icon: mdi:doorbell-video
+  - action: notify.mobile_app_linda_samsung
+    data:
+      message: Er wordt aangebeld bij de voordeur
+      title: Voordeur bel
+      data:
+        vibrationPattern: 100, 1000, 100, 1000, 100
+        channel: deurbel
+        color: red
+        notification_icon: mdi:doorbell-video
+  - action: notify.mobile_app_honor_jeroen
+    data:
+      message: Er wordt aangebeld bij de voordeur
+      title: Voordeur bel
+      data:
+        vibrationPattern: 100, 1000, 100, 1000, 100
+        channel: deurbel
+        color: red
+        notification_icon: mdi:doorbell-video
+  - action: notify.mobile_app_vincent_mobiel
+    data:
+      message: Er wordt aangebeld bij de voordeur
+      title: Voordeur bel
+      data:
+        vibrationPattern: 100, 1000, 100, 1000, 100
+        channel: deurbel
+        color: red
+        notification_icon: mdi:doorbell-video
+  - action: notify.HAcsfolmer
+    data:
+      message: Er wordt aangebeld bij de voordeur
+      title: Voordeur bel
+      data:
+        notification_icon: mdi:doorbell-video
+- id: '1735296311861'
+  alias: Afvalmelding papier
+  description: Melding dag voor afval
+  triggers:
+  - at: 06:15:00
+    trigger: time
+  conditions:
+  - condition: state
+    entity_id: sensor.days_until_collection_paper
+    state: '0'
+  actions:
+  - data:
+      message: papier bak vandaag aan de straat kant
+      title: Afval vandaag
+    action: notify.notify
+  - action: notify.hacsfolmer
+    metadata: {}
+    data:
+      message: Papier container aan de straatkant zetten
+      title: Papier afval!
+  mode: single
+- id: '1735809001262'
+  alias: Afvalmelding GFT
+  description: Melding dag voor afval
+  triggers:
+  - at: 06:15:00
+    trigger: time
+  conditions:
+  - condition: state
+    entity_id: sensor.days_until_collection_gft
+    state: '0'
+  actions:
+  - data:
+      message: GFT bak vandaag aan de straat kant
+      title: Afval vandaag
+    action: notify.notify
+  - action: notify.hacsfolmer
+    metadata: {}
+    data:
+      message: GFT container aan de straatkant zetten
+      title: GFT afval!
+  mode: single
+- id: '1735817275096'
+  alias: Afvalmelding TTS
+  description: Melding dag voor afval via gesproken bericht
+  triggers:
+  - at: '18:00'
+    trigger: time
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.afvalinfo_home_trash_type_tomorrow
+      state: none
+  actions:
+  - data:
+      volume_level: 0.5
+    entity_id: media_player.keuken_speaker
+    action: media_player.volume_set
+  - data:
+      entity_id: media_player.keuken_speaker
+      message: Morgen wordt het afval opgehaald. Zet de {{states.sensor.afvalinfo_home_trash_type_tomorrow.state}}
+        buiten.
+      language: nl
+    action: tts.google_translate_say
+  mode: single
+- id: '1735817773749'
+  alias: voordeur bel TTS
+  description: Melding van deurbel via gesproken bericht
+  triggers:
+  - type: running
+    device_id: e35a15c9060167a704dece95d1129233
+    entity_id: a9581780d468914e5da467994826e79f
+    domain: binary_sensor
+    trigger: device
+  conditions: []
+  actions:
+  - data:
+      volume_level: 0.5
+    action: media_player.volume_set
+    target:
+      entity_id: media_player.keuken_speaker
+  - data:
+      entity_id: media_player.keuken_speaker
+      message: Er staat iemand voor de voordeur
+      language: nl
+    action: tts.google_translate_say
+  mode: single
+- id: '1736155342886'
+  alias: 'Doorbell cam notification '
+  description: ''
+  use_blueprint:
+    path: AndreiRadchenko/doorbell-cam-actionable-nitification.yaml
+    input:
+      notify_dev: notify.mobile_app_kees_mobiel
+      doorbell_cam: camera.deurbel
+      doorbell_button: event.voordeur_bel
+- id: '1738869152006'
+  alias: vaatwasser glasspoelmidel
+  description: ''
+  triggers:
+  - entity_id:
+    - sensor.vaatwasser_rinse_aid_nearly_empty
+    to: present
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    trigger: state
+    from: 'off'
+  conditions: []
+  actions:
+  - data:
+      message: Glansspoel middel van de vaatwasser is bijna op
+    action: notify.mobile_app_kees_mobiel
+  - data:
+      message: Glansspoel middel van de vaatwasser is bijna op
+    action: notify.mobile_app_linda_samsung
+  - action: notify.HAcsfolmer
+    data:
+      message: Glansspoel middel van de vaatwasser is bijna op
+      title: Vaatwasser
+      data:
+        channel: vaatwasser
+  mode: single
+- id: '1738869675885'
+  alias: vaatwasser zout op
+  description: ''
+  triggers:
+  - entity_id:
+    - sensor.vaatwasser_salt_nearly_empty
+    from: present
+    to: 'off'
+    trigger: state
+  conditions: []
+  actions:
+  - data:
+      message: vaatwasser zout is bijna op
+      data: {}
+    action: notify.mobile_app_kees_mobiel
+  - data:
+      message: vaatwasser zout is bijna op
+    action: notify.mobile_app_linda_samsung
+  - action: notify.HAcsfolmer
+    data:
+      message: vaatwasser zout is bijna op
+      title: Vaatwasser
+      data:
+        channel: vaatwasser
+  mode: single
