@@ -1,7 +1,16 @@
 type: custom:mushroom-template-badge
 content: |
-  👋🏼 Hi {{ user }}, 
-
+  👋🏼 {% set uur = now().hour %}
+     {% if uur >= 6 and uur < 12 %}
+    Goedemorgen {{ user }}!
+     {% elif uur >= 12 and uur < 18 %}
+    Goedemiddag {{ user }}!
+     {% elif uur >= 18 and uur < 23 %}
+    Goedenavond {{ user }}!
+     {% else %}
+    Goedenacht {{ user }}!
+     {% endif %}
+   
     {% set dagen = {
 
     'Monday': 'maandag',
