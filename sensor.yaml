@@ -1,0 +1,57 @@
+#sensor.yaml file for custom template sensors
+
+#wasmachine sensors
+- platform: template
+  sensors:
+     lader_watts:
+       friendly_name_template: "{{ states.switch.lader.name}} actueel verbruik"
+       value_template: '{{ states.switch.lader.attributes["current_power_w"] | float }}'
+       unit_of_measurement: 'W'
+     lader_totaal_kwh:
+       friendly_name_template: "{{ states.switch.lader.name}} totaal verbruik"
+       value_template: '{{ states.switch.lader.attributes["total_consumption"] | float }}'
+       unit_of_measurement: 'kWh'
+     lader_temperatuur:
+       friendly_name_template: "{{ states.switch.lader.name}} lader temperatuur"
+       value_template: '{{ states.switch.lader.attributes["temperature"] | float }}'
+       unit_of_measurement: '°C'
+#wasmachine sensors
+- platform: template
+  sensors:
+     wasmachine_watts:
+       friendly_name_template: "{{ states.switch.wasmachine.name}} actueel verbruik"
+       value_template: '{{ states.switch.wasmachine.attributes["current_power_w"] | float }}'
+       unit_of_measurement: 'W'
+     wasmachine_totaal_kwh:
+       friendly_name_template: "{{ states.switch.wasmachine.name}} totaal verbruik"
+       value_template: '{{ states.switch.wasmachine.attributes["total_consumption"] | float }}'
+       unit_of_measurement: 'kWh'
+     wasmachine_temperatuur:
+       friendly_name_template: "{{ states.switch.wasmachine.name}} wasmachine temperatuur"
+       value_template: '{{ states.switch.wasmachine.attributes["temperature"] | float }}'
+       unit_of_measurement: '°C'
+#droger sensors
+- platform: template
+  sensors:
+     droger_watts:
+       friendly_name_template: "{{ states.switch.droger.name}} actueel verbruik"
+       value_template: '{{ states.switch.droger.attributes["current_power_w"] | float }}'
+       unit_of_measurement: 'W'
+     droger_totaal_kwh:
+       friendly_name_template: "{{ states.switch.droger.name}} totaal verbruik"
+       value_template: '{{ states.switch.droger.attributes["total_consumption"] | float }}'
+       unit_of_measurement: 'kWh'
+     droger_temperatuur:
+       friendly_name_template: "{{ states.switch.droger.name}} droger temperatuur"
+       value_template: '{{ states.switch.droger.attributes["temperature"] | float }}'
+       unit_of_measurement: '°C'
+       
+#afvalinfo
+- platform: template
+  sensors:
+      days_until_collection_paper:
+        value_template: "{{ state_attr('sensor.afvalinfo_home_papier', 'days_until_collection_date') }}"
+- platform: template
+  sensors:
+      days_until_collection_gft:
+        value_template: "{{ state_attr('sensor.afvalinfo_home_gft', 'days_until_collection_date') }}"
