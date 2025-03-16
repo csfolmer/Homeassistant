@@ -90,20 +90,20 @@ telegram_bot:
 notify:
   - platform: telegram
     name: "HAcsfolmer"
-    chat_id: chatidno
-  - name: "bericht kees"
-    platform: group
-    services:
-      - service: mobile_app_pixel_7a
+    chat_id: ID
   - name: "bericht all"
     platform: group
     services:
-      - service: mobile_app_xxx
-      - service: mobile_app_xxx
-      - service: mobile_app_xxx
-      - service: mobile_app_xxx
+      - service: mobile_app_pixel_7a
+      - service: mobile_app_linda_samsung
+      - service: mobile_app_honor_jeroen
+      - service: mobile_app_vincent_mobiel
   - name: "bericht K en L"
     platform: group
     services:
       - service: mobile_app_pixel_7a
       - service: mobile_app_linda_samsung
+  - name: "bericht kees"
+    platform: group
+    services:
+      - service: mobile_app_pixel_7a  
