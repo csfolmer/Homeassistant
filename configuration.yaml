@@ -106,4 +106,4 @@ notify:
     platform: group
     services:
       - service: mobile_app_pixel_7a
-      - service: mobile_app_linda_samsungd
+      - service: mobile_app_linda_samsung
