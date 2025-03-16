@@ -102,5 +102,8 @@ notify:
       - service: mobile_app_xxx
       - service: mobile_app_xxx
       - service: mobile_app_xxx
-
-
+  - name: "bericht K en L"
+    platform: group
+    services:
+      - service: mobile_app_pixel_7a
+      - service: mobile_app_linda_samsungd
