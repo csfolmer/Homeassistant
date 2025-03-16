@@ -1,0 +1,106 @@
+# My Configure of Home Assistant (frontend, api, etc)
+default_config:
+# configuration.yaml entry
+
+frontend:
+  themes: !include_dir_merge_named themes
+  extra_module_url:
+    - /local/community/custom-brand-icons/custom-brand-icons.js  
+
+#Hacs
+#hacs:
+#  token: Hacs token
+
+#Pyscript import all
+pyscript:
+  allow_all_imports: true
+
+logger:
+  logs:
+    custom_components.pyscript.file.pv_excess_control: debug
+
+#Sonoff ewelink
+sonoff:
+  username: XXXXXXX
+  password:
+    XXXXX
+    # mode: local
+  reload: always # update device list every time HA starts
+  force_update: [temperature, power]
+  scan_interval: "00:05:00" # (optional) default 5 minutes
+  sensors: [temperature, humidity, power, current, voltage, rssi]
+# Text to speech
+tts:
+  - platform: google_translate
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+sensor: !include sensor.yaml
+# customize: !include customize.yaml
+# script: !include radio_play.yaml
+
+#toon
+toon:
+  client_id: ID
+  client_secret: secret
+
+homeassistant:
+  packages: !include_dir_named packages
+  customize: !include customize.yaml
+  allowlist_external_dirs:
+    - "/config"
+
+#magicHome verlichting
+#light:
+#    - platform: flux_led
+#      automatic_add: true
+#      devices:
+#        192.168.86.22:
+#          name: flux_mb_bulb1
+#          mode: "rgbw"
+#        192.168.86.85:
+#          name: flux_mb_bulb2
+#          mode: "rgbw"
+#
+
+#Somfy Tahoma
+#tahoma:
+# username: username
+#  password: pass
+#infuxdb
+influxdb:
+  host: influxdb
+  port: 8086
+  database: homeassistant
+  username: homeassistant
+  password: password
+  max_retries: 3
+  default_measurement: state
+  
+# Telegram Bot
+telegram_bot:
+  - platform: polling
+    api_key: "API key"
+    allowed_chat_ids:
+      - chatidno
+
+# Notifier
+notify:
+  - platform: telegram
+    name: "HAcsfolmer"
+    chat_id: chatidno
+  - name: "bericht kees"
+    platform: group
+    services:
+      - service: mobile_app_pixel_7a
+  - name: "bericht all"
+    platform: group
+    services:
+      - service: mobile_app_xxx
+      - service: mobile_app_xxx
+      - service: mobile_app_xxx
+      - service: mobile_app_xxx
+
+
