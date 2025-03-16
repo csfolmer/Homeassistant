@@ -98,16 +98,11 @@
     input:
       power_sensor: sensor.fritz_smart_energy_200_1_vermogen
       actions:
-      - device_id: 5ba6a31176bad7a8ca6d7ef95b452ba0
-        domain: mobile_app
-        type: notify
-        title: wasmachine klaar
-        message: De wasmachine is klaar
-      - device_id: 83d36b1108d54a111b947a14cce43e5f
-        domain: mobile_app
-        type: notify
-        message: Wasmachine is klaar
-        title: Wasmachine is klaar
+      - action: notify.bericht_K_en_L
+        data:
+          title: De was!!
+          message: Wasmachine is klaar
+          notification_icon: mdi:washing-machine-alert
       - action: notify.hacsfolmer
         data:
           message: De wasmachine is klaar dus de schone was kan opgehangen of in de
@@ -125,20 +120,15 @@
       power_sensor: sensor.fritz_smart_energy_200_2_vermogen
       starting_hysteresis: 3
       actions:
-      - device_id: 5ba6a31176bad7a8ca6d7ef95b452ba0
-        domain: mobile_app
-        type: notify
-        title: Droger klaar
-        message: De droger is klaar!
-      - device_id: 83d36b1108d54a111b947a14cce43e5f
-        domain: mobile_app
-        type: notify
-        message: Droger is klaar
-        title: Droger is klaar
+      - action: notify.bericht_K_en_L
+        data:
+          message: De droger is klaar en kan uitgeruimd worden
+          title: De droger!!
+          notification_icon: mdi:tumble-dryer-alert
       - action: notify.hacsfolmer
         data:
           message: De droger is klaar en kan uitgeruimd worden
-          title: De Was!!
+          title: De droger!!
       finishing_hysteresis: 2
 - id: '1617913266477'
   alias: Watch batterij management
@@ -355,13 +345,9 @@
     to: ready
   conditions: []
   actions:
-  - action: notify.mobile_app_kees_mobiel
+  - action: notify.bericht_K_en_L
     data:
-      message: vaatwasser is klaar en mag uitgeruimd worden
-      data:
-        notification_icon: mdi:dishwasher-alert
-  - action: notify.mobile_app_linda_samsung
-    data:
+      title: Vaatwasser
       message: vaatwasser is klaar en mag uitgeruimd worden
       data:
         notification_icon: mdi:dishwasher-alert
@@ -371,27 +357,6 @@
       title: Vaatwasser
       data:
         channel: vaatwasser
-  mode: single
-- id: '1714408429894'
-  alias: vaatwasser aan en deur open
-  description: ''
-  triggers:
-  - entity_id:
-    - sensor.vaatwasser_deur
-    from: 'off'
-    to: 'on'
-    trigger: state
-  conditions:
-  - condition: state
-    entity_id: sensor.vaatwasser_operation_state
-    state: Run
-  actions:
-  - data:
-      message: Vaatwasser is open en mag uitgeruimd worden
-    action: notify.mobile_app_kees_mobiel
-  - data:
-      message: vaatwasser is open en mag uitgeruimd worden
-    action: notify.mobile_app_linda_samsung
   mode: single
 - id: '1717221095700'
   alias: automatische update HA
@@ -432,34 +397,7 @@
     trigger: device
   conditions: []
   actions:
-  - action: notify.mobile_app_kees_mobiel
-    data:
-      message: Er wordt aangebeld bij de voordeur
-      title: Voordeur bel
-      data:
-        vibrationPattern: 100, 1000, 100, 1000, 100
-        channel: deurbel
-        color: red
-        notification_icon: mdi:doorbell-video
-  - action: notify.mobile_app_linda_samsung
-    data:
-      message: Er wordt aangebeld bij de voordeur
-      title: Voordeur bel
-      data:
-        vibrationPattern: 100, 1000, 100, 1000, 100
-        channel: deurbel
-        color: red
-        notification_icon: mdi:doorbell-video
-  - action: notify.mobile_app_honor_jeroen
-    data:
-      message: Er wordt aangebeld bij de voordeur
-      title: Voordeur bel
-      data:
-        vibrationPattern: 100, 1000, 100, 1000, 100
-        channel: deurbel
-        color: red
-        notification_icon: mdi:doorbell-video
-  - action: notify.mobile_app_vincent_mobiel
+  - action: notify.bericht_all
     data:
       message: Er wordt aangebeld bij de voordeur
       title: Voordeur bel
@@ -488,7 +426,7 @@
   - data:
       message: papier bak vandaag aan de straat kant
       title: Afval vandaag
-    action: notify.notify
+    action: notify.bericht_all
   - action: notify.hacsfolmer
     metadata: {}
     data:
@@ -509,36 +447,12 @@
   - data:
       message: GFT bak vandaag aan de straat kant
       title: Afval vandaag
-    action: notify.notify
+    action: notify.bericht_all
   - action: notify.hacsfolmer
     metadata: {}
     data:
       message: GFT container aan de straatkant zetten
       title: GFT afval!
-  mode: single
-- id: '1735817275096'
-  alias: Afvalmelding TTS
-  description: Melding dag voor afval via gesproken bericht
-  triggers:
-  - at: '18:00'
-    trigger: time
-  conditions:
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: sensor.afvalinfo_home_trash_type_tomorrow
-      state: none
-  actions:
-  - data:
-      volume_level: 0.5
-    entity_id: media_player.keuken_speaker
-    action: media_player.volume_set
-  - data:
-      entity_id: media_player.keuken_speaker
-      message: Morgen wordt het afval opgehaald. Zet de {{states.sensor.afvalinfo_home_trash_type_tomorrow.state}}
-        buiten.
-      language: nl
-    action: tts.google_translate_say
   mode: single
 - id: '1735817773749'
   alias: voordeur bel TTS
@@ -586,12 +500,12 @@
     from: 'off'
   conditions: []
   actions:
-  - data:
+  - action: notify.bericht_K_en_L
+    data:
+      title: Vaatwasser
       message: Glansspoel middel van de vaatwasser is bijna op
-    action: notify.mobile_app_kees_mobiel
-  - data:
-      message: Glansspoel middel van de vaatwasser is bijna op
-    action: notify.mobile_app_linda_samsung
+      data:
+        notification_icon: mdi:dishwasher-alert
   - action: notify.HAcsfolmer
     data:
       message: Glansspoel middel van de vaatwasser is bijna op
@@ -610,13 +524,12 @@
     trigger: state
   conditions: []
   actions:
-  - data:
+  - action: notify.bericht_K_en_L
+    data:
+      title: vaatwasser
       message: vaatwasser zout is bijna op
-      data: {}
-    action: notify.mobile_app_kees_mobiel
-  - data:
-      message: vaatwasser zout is bijna op
-    action: notify.mobile_app_linda_samsung
+      data:
+        notification_icon: mdi:dishwasher-alert
   - action: notify.HAcsfolmer
     data:
       message: vaatwasser zout is bijna op
