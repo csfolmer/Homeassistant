@@ -1,3 +1,4 @@
+#doorbel automation
 alias: Deur bel!
 description: Er wordt aan de deur gebeld
 triggers:
