@@ -102,7 +102,8 @@
         data:
           title: De was!!
           message: Wasmachine is klaar
-          notification_icon: mdi:washing-machine-alert
+          data:
+            notification_icon: mdi:washing-machine-alert
       - action: notify.hacsfolmer
         data:
           message: De wasmachine is klaar dus de schone was kan opgehangen of in de
@@ -124,7 +125,8 @@
         data:
           message: De droger is klaar en kan uitgeruimd worden
           title: De droger!!
-          notification_icon: mdi:tumble-dryer-alert
+          data:
+            notification_icon: mdi:tumble-dryer-alert
       - action: notify.hacsfolmer
         data:
           message: De droger is klaar en kan uitgeruimd worden
