@@ -1,0 +1,15 @@
+alias: tuin verlichting aan bij zonondergang
+description: ""
+mode: single
+triggers:
+  - event: sunset
+    trigger: sun
+  - at: "06:30:00"
+    enabled: false
+    trigger: time
+conditions: []
+actions:
+  - action: scene.turn_on
+    target:
+      entity_id: scene.tuin_verlichting_aan
+    data: {}
