@@ -1,0 +1,18 @@
+alias: verlichting uit om 22:30
+description: ""
+triggers:
+  - at: "22:55:00"
+    trigger: time
+conditions: []
+actions:
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.woonkamer_verlichting
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.keuken_verlichting
+mode: single
