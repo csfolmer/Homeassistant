@@ -1,0 +1,15 @@
+alias: woonkamer aan om zonondergang
+description: ""
+triggers:
+  - event: sunset
+    offset: "-00:05:00"
+    trigger: sun
+conditions: []
+actions:
+  - target:
+      entity_id:
+        - light.woonkamer_verlichting
+        - light.keuken_verlichting
+    data: {}
+    action: light.turn_on
+mode: single
