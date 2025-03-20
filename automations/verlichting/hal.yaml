@@ -1,0 +1,138 @@
+#automation for the hal light
+mode: restart
+max_exceeded: silent
+variables:
+  scene_ambient: scene.none
+  scene_morning: scene.none
+  scene_day: scene.none
+  scene_evening: scene.none
+  scene_night: scene.none
+  automation_blocker: null
+  automation_blocker_boolean: false
+  no_motion_blocker: null
+  no_motion_blocker_boolean: false
+  elevation_check: 2
+  scene_no_motion: scene.none
+  motion_entity: binary_sensor.sonoff_a480086571
+triggers:
+  - entity_id: binary_sensor.sonoff_a480086571
+    from: "off"
+    to: "on"
+    trigger: state
+  - entity_id: binary_sensor.sonoff_a480086571
+    from: "on"
+    to: "off"
+    for: 20
+    trigger: state
+conditions:
+  - condition: or
+    conditions:
+      - condition: template
+        value_template: "{{ automation_blocker == none }}"
+      - condition: template
+        value_template: >-
+          {{ automation_blocker_boolean and states[automation_blocker].state ==
+          'on' }}
+      - condition: template
+        value_template: >-
+          {{ not automation_blocker_boolean and states[automation_blocker].state
+          == 'off' }}
+  - condition: template
+    value_template: >-
+      {{ (elevation_check == none) or (state_attr('sun.sun','elevation') <=
+      elevation_check | float(90)) }}
+actions:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.to_state.state == 'on' }}"
+        sequence:
+          - choose:
+              - conditions:
+                  - "{{ scene_morning != 'scene.none'}}"
+                  - condition: time
+                    after: "00:00:00"
+                    before: "00:00:00"
+                sequence:
+                  - action: scene.turn_on
+                    target:
+                      entity_id: scene.none
+                    data: {}
+              - conditions:
+                  - "{{ scene_day != 'scene.none'}}"
+                  - condition: time
+                    after: "00:00:00"
+                    before: "00:00:00"
+                sequence:
+                  - action: scene.turn_on
+                    target:
+                      entity_id: scene.none
+                    data: {}
+              - conditions:
+                  - "{{ scene_evening != 'scene.none'}}"
+                  - condition: time
+                    after: "00:00:00"
+                    before: "00:00:00"
+                sequence:
+                  - action: scene.turn_on
+                    target:
+                      entity_id: scene.none
+                    data: {}
+              - conditions:
+                  - condition: template
+                    value_template: "{{ scene_night != 'scene.none'}}"
+                  - condition: time
+                    after: "00:00:00"
+                    before: "00:00:00"
+                sequence:
+                  - action: scene.turn_on
+                    target:
+                      entity_id: scene.none
+                    data: {}
+            default:
+              - target:
+                  entity_id: switch.sonoff_100108c3d0_1
+                action: switch.turn_on
+                data: {}
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.to_state.state == 'off' }}"
+          - condition: or
+            conditions:
+              - condition: template
+                value_template: "{{ no_motion_blocker == none }}"
+              - condition: template
+                value_template: >-
+                  {{ no_motion_blocker_boolean and
+                  states[no_motion_blocker].state == 'on' }}
+              - condition: template
+                value_template: >-
+                  {{ not no_motion_blocker_boolean and
+                  states[no_motion_blocker].state == 'off' }}
+        sequence:
+          - choose:
+              - conditions:
+                  - "{{ scene_ambient != 'scene.none' }}"
+                  - condition: time
+                    after: "00:00:00"
+                    before: "00:00:00"
+                sequence:
+                  - action: scene.turn_on
+                    target:
+                      entity_id: scene.none
+                    data: {}
+              - conditions:
+                  - condition: template
+                    value_template: "{{ scene_no_motion != 'scene.none' }}"
+                sequence:
+                  - action: scene.turn_on
+                    target:
+                      entity_id: scene.none
+                    data: {}
+            default:
+              - target:
+                  entity_id: switch.sonoff_100108c3d0_1
+                action: switch.turn_off
+                data: {}
+alias: Hal licht auto aan en uit
+description: ""
