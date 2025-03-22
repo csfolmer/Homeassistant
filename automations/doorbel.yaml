@@ -1,0 +1,27 @@
+alias: Deur bel!
+description: Er wordt aan de deur gebeld
+triggers:
+  - type: running
+    device_id: e35a15c9060167a704dece95d1129233
+    entity_id: a9581780d468914e5da467994826e79f
+    domain: binary_sensor
+    trigger: device
+conditions: []
+actions:
+  - action: notify.bericht_all
+    data:
+      message: Er wordt aangebeld bij de voordeur
+      title: Voordeur bel
+      data:
+        ttl: 0
+        priority: high
+        vibrationPattern: 100, 1000, 100, 1000, 100
+        channel: deurbel
+        color: red
+        notification_icon: mdi:doorbell-video
+  - action: notify.HAcsfolmer
+    data:
+      message: Er wordt aangebeld bij de voordeur
+      title: Voordeur bel
+      data:
+        notification_icon: mdi:doorbell-video
