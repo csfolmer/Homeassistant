@@ -1,0 +1,8 @@
+#dhl pakketten
+command_line:
+  - sensor:
+      name: DHL Packages
+      command: 'curl -v --cookie "X-AUTH-TOKEN=add_here_the_long_auth_token_from_DHL" https://my.dhlecommerce.nl/receiver-parcel-api/parcels'
+      value_template: "{{ value_json.parcels | list | count }}"
+      json_attributes:
+        - parcels
