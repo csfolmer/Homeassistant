@@ -1,4 +1,4 @@
-# here my DHL add to Home assitant
+# here my DHL add to Home assistant
 Custom intergration for DHL packages
 
 Main that I use is the intergration for PostNL made by Arjenbos.
