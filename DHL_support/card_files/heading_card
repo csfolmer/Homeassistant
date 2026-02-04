@@ -1,0 +1,17 @@
+type: heading
+heading: Pakketten
+heading_style: subtitle
+icon: mdi:package-variant-closed
+badges:
+  - type: entity
+    show_state: true
+    show_icon: true
+    entity: sensor.postnl_pakketten_aantal
+    name: PostNL
+    icon: phu:postnl
+  - type: entity
+    show_state: true
+    show_icon: true
+    entity: sensor.dhl_pakketten_aantal
+    name: DHL
+    icon: phu:dhl
