@@ -1,0 +1,85 @@
+# change YOURCALENDAR to your own calendar ID
+# line 59, 65 and 82
+alias: Sync packages to calendar
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - sensor.postnl_delivery
+  - trigger: state
+    entity_id:
+      - sensor.dhl_packages
+conditions: []
+actions:
+  - variables:
+      packages: |
+        {% set ns = namespace(packages=[]) %}
+        {% if state_attr('sensor.postnl_delivery', 'enroute') is not none %}
+          {% for item in state_attr('sensor.postnl_delivery', 'enroute') %}
+            {% if item.planned_from and item.planned_to %}
+              {% set ns.packages = ns.packages + [{
+                'name': '📦POSTNL: ' + item.name,
+                'state': item.status_message if item.status_message else 'No status available',
+                'secondary': item.url,
+                'expected_start': as_timestamp(item.planned_from),
+                'expected_end': as_timestamp(item.planned_to)
+              }] %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+        {% if state_attr('sensor.dhl_packages', 'parcels') is not none %}
+          {% for parcel in state_attr('sensor.dhl_packages', 'parcels') %}
+            {% set receiving_time = parcel.receivingTimeIndication %}
+            {% if receiving_time and receiving_time.start and receiving_time.end %}
+              {% set ns.packages = ns.packages + [{
+                'name': '📦DHL: ' + parcel.sender.name if parcel.sender.name else parcel.barcode,
+                'state': parcel.status | replace('_', ' ') | lower() | capitalize(),
+                'secondary': 'https://www.dhl.com/nl-en/home/tracking/tracking-parcel.html?submit=1&tracking-id=' + parcel.barcode,
+                'expected_start': as_timestamp(receiving_time.start),
+                'expected_end': as_timestamp(receiving_time.end)
+              }] %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+        {{ ns.packages }}
+  - repeat:
+      count: "{{ packages | length }}"
+      sequence:
+        - action: calendar.get_events
+          metadata: {}
+          data:
+            start_date_time: |-
+              {{ packages[repeat.index - 1].expected_start |
+                  timestamp_custom('%Y-%m-%d') + ' 00:00:00' }}
+            end_date_time: |-
+              {{ packages[repeat.index - 1].expected_end |
+                  timestamp_custom('%Y-%m-%d') + ' 23:59:59' }}
+          response_variable: events
+          target:
+            entity_id: YOURCALENDAR
+          enabled: true
+        - if:
+            - condition: template
+              value_template: >-
+                {% set name = packages[repeat.index-1].name %} {% set found =
+                events['YOURCALENDAR']['events'] | selectattr('summary',
+                'equalto', name | trim) | list %} {{ found | length == 0 }} 
+          then:
+            - action: calendar.create_event
+              metadata: {}
+              data:
+                start_date_time: >-
+                  {{ packages[repeat.index - 1].expected_start |
+                  timestamp_custom('%Y-%m-%d %H:%M:%S') }}
+                end_date_time: >-
+                  {{ packages[repeat.index - 1].expected_end |
+                  timestamp_custom('%Y-%m-%d %H:%M:%S') }}
+                summary: "{{ packages[repeat.index - 1].name | trim }}"
+                description: >-
+                  {{ packages[repeat.index - 1].state + ' ' +
+                  packages[repeat.index - 1].secondary }}
+              target:
+                entity_id: YOURCALENDAR
+              enabled: true
+    enabled: true
+mode: single
