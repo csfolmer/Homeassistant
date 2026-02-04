@@ -23,4 +23,4 @@ So I did filter a lot and got it up and running.
     - Copy the value at X-AUTH-TOKEN
 
 ## My card:
-- See the 3 card codes
+- See the 3 card codes https://github.com/csfolmer/Homeassistant/tree/main/DHL_support/card_files
