@@ -1,0 +1,182 @@
+type: custom:auto-entities
+card:
+  type: entities
+  show_header_toggle: false
+  card_mod:
+    style: |
+      #states {
+        margin-right: 10px;
+        padding-left: 15px;
+      }
+      #states > div:nth-child(1) {
+        margin-top: -25px;
+      }
+filter:
+  template: >
+    {# DHL ophalen #}  {% set dhl_pakketjes =
+    state_attr('sensor.dhl_packages','parcels') or [] %}  {% set dhl_onderweg =
+    namespace(list=[]) %}  {% set dhl_recent_afgeleverd = namespace(list=[]) %}
+
+    {# DHL pakketten #} {% for pakket in dhl_pakketjes %}
+      {% set status = pakket.status | lower %}
+      {% set tijd_raw = pakket.receivingTimeIndication.start if pakket.receivingTimeIndication.start is defined else pakket.receivingTimeIndication.moment %}
+      {% if tijd_raw %}
+        {% set tijd = as_timestamp(tijd_raw) | timestamp_custom('%d-%m-%Y %H:%M') %}
+      {% else %}
+        {% set tijd = 'Onbekend' %}
+      {% endif %}
+      {% set naam = pakket.sender.name if pakket.sender.name else 'Onbekende afzender' %}
+      {% set barcode = pakket.barcode %}
+      {% set nette_status = pakket.status | replace('_', ' ') | lower() | capitalize() %}
+      {% if nette_status == 'Shipment picked up' %}
+        {% set nette_status = 'Ontvangen door DHL' %}
+      {% endif %}
+      {% if nette_status == 'In transit' %}
+        {% set nette_status = 'Onderweg' %}
+      {% endif %}
+      {% if nette_status == 'Out for delivery' %}
+        {% set nette_status = 'Wordt bezorgd' %}
+      {% endif %}
+      {% if nette_status == 'Delivered' or nette_status == 'Delivered in mailbox' %}
+        {% set nette_status = 'Bezorgd' %}
+      {% endif %}
+      {% set dhl_track_url = 'https://www.dhl.com/nl-en/home/tracking.html?tracking-id=' ~ barcode ~ '&submit=1' %}
+
+      {% set row = {
+        'type': 'custom:template-entity-row',
+        'entity': 'sensor.dhl_packages',
+        'name': '' ~ naam ~ ' - ' ~ barcode,
+        'state': nette_status,
+        'secondary': 'Bezorgtijd: ' ~ tijd,
+        'icon': 'phu:dhl',
+        'color': '#ffcc00',
+        'tap_action': {
+          'action': 'url',
+          'url_path': dhl_track_url
+        }
+      } %}
+
+      {% if 'delivered' in status or 'collected' in status %}
+        {% if pakket.receivedDaysAgo is not none and pakket.receivedDaysAgo <= 3 %}
+          {% set dhl_recent_afgeleverd.list = dhl_recent_afgeleverd.list + [row] %} 
+        {% endif %}
+      {% else %}
+        {% set dhl_onderweg.list = dhl_onderweg.list + [row] %}
+      {% endif %}
+    {% endfor %}
+
+    {# PostNL ophalen #}  {% set postnl_enroute =
+    state_attr('sensor.postnl_delivery', 'enroute') or [] %}  {% set
+    postnl_delivered = state_attr('sensor.postnl_delivery', 'delivered') or []
+    %}  {% set postnl_onderweg = namespace(list=[]) %}  {% set
+    postnl_recent_afgeleverd = namespace(list=[]) %}
+
+    {# PostNL onderweg pakketten #}  {% for pakket in postnl_enroute %}
+      {% set naam = pakket.name if pakket.name else 'Onbekende afzender' %}
+      {% set barcode = pakket.key %}
+      {% set nette_status = pakket.status_message | default('Status onbekend') %}
+      {% if 'nog niet door PostNL ontvangen of verwerkt' in nette_status %}
+        {% set nette_status = 'Aangemeld' %}
+      {% endif %}
+      {% set tijd_raw = pakket.planned_from %}
+      {% if tijd_raw %}
+        {% set tijd = as_timestamp(tijd_raw) | timestamp_custom('%d-%m-%Y %H:%M') %}
+      {% else %}
+        {% set tijd = 'Onbekend' %}
+      {% endif %}
+      {% set postnl_track_url = pakket.url if pakket.url is defined else 'https://www.postnl.nl/tracktrace' %}
+      {% set row = {
+        'type': 'custom:template-entity-row',
+        'entity': 'sensor.postnl_delivery',
+        'name': '' ~ naam ~ ' - ' ~ barcode,
+        'state': nette_status,
+        'secondary': 'Verwacht: ' ~ tijd,
+        'icon': 'phu:postnl',
+        'color': '#FB6200',
+        'tap_action': {
+          'action': 'url',
+          'url_path': postnl_track_url
+        }
+      } %}
+      {% set postnl_onderweg.list = postnl_onderweg.list + [row] %}
+    {% endfor %}
+
+    {# PostNL recent afgeleverd pakketten (max 3 dagen) #}  {% for pakket in
+    postnl_delivered %}
+      {% set tijd_raw = pakket.delivery_date %}
+      {% if tijd_raw %}
+        {% set tijd_ts = as_timestamp(tijd_raw) %}
+        {% set nu = now().timestamp() %}
+        {% set dagen_verschil = (nu - tijd_ts) / 86400 %}
+      {% else %}
+        {% set dagen_verschil = 999 %}
+      {% endif %}
+      {% if dagen_verschil <= 3 %}
+        {% set naam = pakket.name if pakket.name else 'Onbekende afzender' %}
+        {% set barcode = pakket.key %}
+        {% set nette_status = pakket.status_message | default('Status onbekend') %}
+        {% if 'Pakket is bezorgd' in nette_status %}
+          {% set nette_status = 'Bezorgd' %}
+        {% endif %}
+        {% set tijd = tijd_ts | timestamp_custom('%d-%m-%Y %H:%M') %}
+        {% set postnl_track_url = pakket.url if pakket.url is defined else 'https://www.postnl.nl/tracktrace' %}
+        {% set row = {
+          'type': 'custom:template-entity-row',
+          'entity': 'sensor.postnl_delivery',
+          'name': '' ~ naam ~ ' - ' ~ barcode,
+          'state': nette_status,
+          'secondary': 'Bezorgd op: ' ~ tijd,
+          'icon': 'phu:postnl',
+          'color': '#FB6200',
+          'tap_action': {
+            'action': 'url',
+            'url_path': postnl_track_url
+          }
+        } %}
+        {% set postnl_recent_afgeleverd.list = postnl_recent_afgeleverd.list + [row] %}
+      {% endif %}
+    {% endfor %}
+
+    {# Eindlijst bouwen #} {% set all_onderweg_items = [] %}
+
+    {% if dhl_onderweg.list %}
+      {% set all_onderweg_items = all_onderweg_items + dhl_onderweg.list %}
+    {% endif %}
+
+    {% if postnl_onderweg.list %}
+      {% set all_onderweg_items = all_onderweg_items + postnl_onderweg.list %}
+    {% endif %}
+
+    {% set all_recent_afgeleverd_items = [] %}
+
+    {% if dhl_recent_afgeleverd.list %}
+      {% set all_recent_afgeleverd_items = all_recent_afgeleverd_items + dhl_recent_afgeleverd.list %}
+    {% endif %}
+
+    {% if postnl_recent_afgeleverd.list %}
+      {% set all_recent_afgeleverd_items = all_recent_afgeleverd_items + postnl_recent_afgeleverd.list %}
+    {% endif %}
+
+    [
+      {% if all_onderweg_items | count > 0 %}
+        {
+          "type": "section",
+          "label": "🚚 Onderweg"
+        }
+        {% if all_onderweg_items | count > 0 %}, {{ all_onderweg_items | join(',') }}{% endif %}
+      {% endif %}
+      
+      {# Add a comma between sections ONLY if both exist #}
+      {% if (all_onderweg_items | count > 0) and (all_recent_afgeleverd_items | count > 0) %},{% endif %}
+
+      {% if all_recent_afgeleverd_items | count > 0 %}
+        {
+          "type": "section",
+          "label": "📦 Recent afgeleverd"
+        }
+        {% if all_recent_afgeleverd_items | count > 0 %}, {{ all_recent_afgeleverd_items | join(',') }}{% endif %}
+      {% endif %}
+    ]
+show_empty: true
+grid_options:
+  columns: full
