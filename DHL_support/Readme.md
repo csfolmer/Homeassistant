@@ -24,3 +24,9 @@ So I did filter a lot and got it up and running.
 
 ## My card:
 - See the 3 card codes https://github.com/csfolmer/Homeassistant/tree/main/DHL_support/card_files
+
+## ADD on:
+## Sync to calendar
+- add on for my google calendar is the automation "Sync packages to calendar automation"
+  copy past this to your automation
+  - change YOURCALENDAR in Line 59, 65 and 82 to your own calendar ID
