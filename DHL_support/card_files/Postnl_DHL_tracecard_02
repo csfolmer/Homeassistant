@@ -1,0 +1,63 @@
+type: conditional
+conditions:
+  - condition: or
+    conditions:
+      - condition: numeric_state
+        entity: sensor.postnl_delivery
+        above: 0
+      - condition: numeric_state
+        entity: sensor.dhl_packages
+        above: 0
+card:
+  type: markdown
+  card_mod:
+    style:
+      ha-markdown$: |
+        table {
+          width: 100%;
+        }
+        thead {
+          font-weight: bold;
+        }
+        ha-icon {           
+             --icon-primary-color: #red;
+        }        
+  content: |
+    <header style="display: flex; align-items: flex-end;">
+      <ha-icon icon="mdi:package-variant" style="vertical-align: bottom;"></ha-icon>
+      <font size="5">Pakketjes</font>
+    </header>
+    <table>
+    <thead>
+      <tr>
+        <td>Bezorger</td>
+        <td>Pakket</td>
+        <td>Datum</td>
+        <td>Tijd</td>
+      </tr>
+    </thead>
+    <tbody>
+    {% for package in state_attr('sensor.postnl_delivery', 'enroute') %}
+      {% if package.planned_date is not none and package.planned_from is defined and package.planned_to is defined %}
+      <tr>
+        <td>PostNL</td>
+        <td>{{ package.name }}</td>
+        <td>{{ as_timestamp(package.planned_date) | timestamp_custom('%-d %b') }}</td>
+        <td>{{ as_timestamp(package.planned_from) | timestamp_custom('%H:%M') }} - {{ as_timestamp(package.planned_to) | timestamp_custom('%H:%M') }}</td>
+      </tr>
+      {% endif %}
+    {% endfor %}
+
+    {% for package in state_attr('sensor.dhl_packages', 'parcels') %}
+      {% if package.receivingTimeIndication is not none and package.receivingTimeIndication.start is defined and package.receivingTimeIndication.end is defined %}
+      <tr>
+        <td>DHL</td>
+        <td>{{ package.sender.name if package.sender is defined else 'Unknown' }}</td>
+        <td>{{ as_timestamp(package.receivingTimeIndication.start) | timestamp_custom('%-d %b') }}</td>
+        <td>{{ as_timestamp(package.receivingTimeIndication.start) | timestamp_custom('%H:%M') }} - {{ as_timestamp(package.receivingTimeIndication.end) | timestamp_custom('%H:%M') }}</td>
+      </tr>
+      {% endif %}
+    {% endfor %}
+
+
+    </tbody>
