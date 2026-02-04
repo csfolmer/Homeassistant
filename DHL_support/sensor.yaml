@@ -1,0 +1,22 @@
+# DHL pakketten
+- sensor:
+    - name: "Aantal Aankomende DHL Pakketjes"
+      state: >
+        {% set dhl_pakketjes = state_attr('sensor.dhl_packages', 'parcels') or [] %}
+        {% set undelivered_count = namespace(value=0) %} {# Initialize as a namespace object #}
+        {% for pakket in dhl_pakketjes %}
+          {% set status = pakket.status | lower %}
+          {% if 'delivered' not in status and 'collected' not in status %}
+            {% set undelivered_count.value = undelivered_count.value + 1 %} {# Update the value property #}
+          {% endif %}
+        {% endfor %}
+        {{ undelivered_count.value }} {# Access the value property #}
+#aantal pakketen
+- sensor:
+    - name: "PostNL Pakketten Aantal"
+      state: "{{ states('sensor.postnl_delivery').split(' ')[0] }}"
+      unit_of_measurement: "" # Dit haalt de 'packages' of 'aantal pakketten' weg.
+
+    - name: "DHL Pakketten Aantal"
+      state: "{{ states('sensor.aantal_aankomende_dhl_pakketjes').split(' ')[0] }}"
+      unit_of_measurement: "" # Dit haalt de 'packages' of 'aantal pakketten' weg.
