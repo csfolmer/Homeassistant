@@ -1,0 +1,268 @@
+type: custom:button-card
+entity: sensor.vaatwasser_programmavoortgang
+name: Vaatwasser
+show_label: true
+tap_action:
+  action: none
+hold_action:
+  action: none
+double_tap_action:
+  action: none
+icon: mdi:dishwasher
+state:
+  - value: Ready
+    label: Idle
+    styles:
+      custom_fields:
+        bar:
+          - display: none
+        stat1:
+          - display: none
+        stat2:
+          - visibility: hidden
+        stat3:
+          - visibility: hidden
+styles:
+  card:
+    - padding: 20px
+    - height: 180px
+    - font-family: Montserrat, sans-serif
+    - font-size: 16px
+    - transition: all 0.5s ease
+    - box-shadow: |
+        [[[
+          if (states['sensor.vaatwasser_power_state'].state !== 'off')
+            return '0px 0px 15px 0px rgba(255, 152, 0, 0.3)'; /* Subtiele oranje gloed als hij aan staat */
+          return 'none'; /* Geen gloed als hij uit staat */
+        ]]]    
+  grid:
+    - grid-template-areas: |
+        "i program"
+        "n stat2"
+        "bar bar"
+        "stat1 stat3"
+    - grid-template-columns: 1fr 1fr
+    - grid-template-rows: 70px min-content 40px min-content
+  name:
+    - justify-self: start
+    - font-size: 16px
+    - font-weight: 500
+  label:
+    - justify-self: start
+    - font-size: 16px
+    - font-weight: 500
+  icon:
+    - width: 34px
+    - color: |
+        [[[
+          if (states['sensor.vaatwasser_power_state'].state !== 'off')
+            return '#2196f3'; /* Oranje als de droger draait */
+          return 'var(--contrast20)'; /* Standaard grijs als hij uit staat */
+        ]]]
+    - animation: |
+        [[[
+          if (states['sensor.vaatwasser_power_state'].state !== 'off')
+            return 'bounce 1.5s ease-in-out infinite, wash 1s ease-in-out infinite';
+          return 'none'; /* Geen animatie als hij uit staat */
+        ]]]
+  img_cell:
+    - justify-self: start
+    - align-self: start
+    - width: 36px
+    - height: 36px
+  custom_fields:
+    program:
+      - justify-self: end
+      - align-self: end
+      - padding-bottom: 6px
+      - font-size: 16px
+      - font-weight: 500
+      - visibility: >
+          [[[ return states['sensor.vaatwasser_power_state'].state !== 'off' ?
+          'visible' : 'hidden'; ]]]
+    stat1:
+      - justify-self: start
+      - font-size: 12px
+      - opacity: 0.7
+    stat2:
+      - justify-self: end
+      - font-size: 16px
+      - font-weight: 500
+      - visibility: >
+          [[[ return states['sensor.vaatwasser_power_state'].state !== 'off' ?
+          'visible' : 'hidden'; ]]]
+    stat3:
+      - justify-self: end
+      - font-size: 12px
+      - opacity: 0.7
+    bar:
+      - justify-self: start
+      - width: 100%
+      - border-radius: 6px
+      - background: var(--slider-color)
+      - height: 16px
+custom_fields:
+  bar: |
+    [[[
+      // Kijk of de wasmachine aan of uit staat
+      var power = states['sensor.vaatwasser_power_state'] ? states['sensor.vaatwasser_power_state'].state : 'off';
+
+      // Percentage ophalen en afronden
+      var raw = states['sensor.vaatwasser_programmavoortgang'].state;
+      var val = parseFloat(raw);
+      if (isNaN(val)) val = 0;
+      var roundedVal = Math.round(val);
+      if (roundedVal > 100) roundedVal = 100;
+      if (roundedVal < 0) roundedVal = 0;
+
+      // Standaard instellingen (voor als hij aan staat)
+      var barKleur = '#2196f3'; // Blauw
+      if (roundedVal >= 80) barKleur = '#4caf50'; // Groen
+      var achtergrondKleur = '#ffc107';
+      var animatie = '<div class="soft-sweep"></div>';
+
+      // Instellingen overschrijven als hij UIT staat
+      if (power === 'off' || power === 'unavailable') {
+        barKleur = '#333333'; // Donkergrijs
+        achtergrondKleur = '#333333'; // Achtergrond ook donkergrijs
+        roundedVal = 100; // Vul de hele balk met de grijze kleur
+        animatie = ''; // Geen animatie tonen
+      }
+
+      return `
+      <div style="
+        background: ${achtergrondKleur}; 
+        border-radius: 6px;
+        width: 100%;
+        height: 16px;
+        overflow: hidden;
+        position: relative;
+      ">
+        <div style="
+          background: ${barKleur}; 
+          border-radius: 6px;
+          width: ${roundedVal}%; 
+          height: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          transition: width 0.5s ease, background 0.5s ease;
+        ">
+          ${animatie}
+        </div>
+      </div>`;
+    ]]]
+  program: |
+    [[[
+      var power = states['sensor.vaatwasser_power_state'].state;
+      var p = states['sensor.vaatwasser_actief_programma'].state;
+
+      var names = {
+        "dishcare_dishwasher_program_eco_50": "Eco",
+        "dishcare_dishwasher_program_auto2": "Auto",
+        "dishcare_dishwasher_program_intensiv_70": "Intensief 70°",
+        "dishcare_dishwasher_program_quick_65": "Snel 65°",
+        "dishcare_dishwasher_program_night_wash": "Stil",
+        "dishcare_dishwasher_program_machine_care": "Onderhoud",
+        "dishcare_dishwasher_program_pre_rinse": "Voor spoelen"
+      };
+
+      if (power === 'off') return "Uit";
+      if (!p || p === 'unknown' || p === 'unavailable') return "Idle";
+
+      return names[p] || p;
+    ]]]
+  stat1: |
+    [[[
+      var rinse = states['sensor.vaatwasser_glansspoelmiddel'].state;
+      var salt = states['sensor.vaatwasser_zout'].state;
+
+      function getColor(state) {
+        if (state === 'empty') return 'red';
+        if (state === 'nearly_empty') return 'orange';
+        if (state === "full") return 'limegreen';
+        return 'grey';
+      }
+
+      return `
+        <span style="color: ${getColor(rinse)}; margin-right: 4px;" class="pulse-icon">
+          <ha-icon icon="mdi:creation-outline" style="width: 16px; height: 16px;"></ha-icon>
+        </span>
+        <span style="color: ${getColor(salt)};" class="pulse-icon">
+          <ha-icon icon="mdi:shaker-outline" style="width: 16px; height: 16px;"></ha-icon>
+        </span>
+      `;
+    ]]]
+  stat2: |
+    [[[
+      var val = states['sensor.vaatwasser_resterende_programmaduur'].state;
+
+      if (!val || val === "unknown" || val === "unavailable") {
+        return "";
+      }
+
+      // decimale uren → float
+      var hoursFloat = parseFloat(val);
+      if (isNaN(hoursFloat)) return "";
+
+      // splitsen in uren + minuten
+      var hours = Math.floor(hoursFloat);
+      var minutes = Math.round((hoursFloat - hours) * 60);
+
+      // bereken eindtijd
+      var now = new Date();
+      now.setHours(now.getHours() + hours);
+      now.setMinutes(now.getMinutes() + minutes);
+
+      var hh = now.getHours().toString().padStart(2, "0");
+      var mm = now.getMinutes().toString().padStart(2, "0");
+
+      return `Klaar om ${hh}:${mm}`;
+    ]]]
+  stat3: |
+    [[[
+      var power = states['sensor.vaatwasser_power_state'].state;
+      if (power === 'off') return "Off";
+
+      var p = states['sensor.vaatwasser_programmavoortgang'].state;
+
+      if (!p || p === 'unknown' || p === 'unavailable') return "Ready";
+
+      return p + "%";
+    ]]]
+card_mod:
+  style: |
+    /* De strakke nieuwe animatie voor in de balk */
+    .soft-sweep {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+      animation: sweep 2s infinite linear;
+    }
+
+    @keyframes sweep {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .pulse-icon {
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: .7; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); opacity: .7; }
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {transform: translateY(0); } 
+      40% { transform: translateY(-1.2px) rotate(5deg); } 
+      60% { transform: translateY(-1.1px) rotate(-4deg); } 
+    } 
+    @keyframes wash {
+      50%  { clip-path: polygon(0 0, 0 100%, 35% 100%, 36% 74%, 31% 43%, 61% 40%, 71% 69%, 62% 78%, 36% 73%, 35% 100%, 100% 100%, 100% 0); }
+    }
