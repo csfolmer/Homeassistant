@@ -1,0 +1,247 @@
+type: custom:button-card
+entity: sensor.droger_voortgang
+name: Droger
+show_label: true
+tap_action:
+  action: none
+hold_action:
+  action: none
+double_tap_action:
+  action: none
+icon: mdi:tumble-dryer
+state:
+  - value: Ready
+    label: Idle
+    styles:
+      custom_fields:
+        bar:
+          - display: none
+        stat1:
+          - display: none
+        stat2:
+          - visibility: hidden
+        stat3:
+          - visibility: hidden
+styles:
+  card:
+    - padding: 20px
+    - height: 180px
+    - font-family: Montserrat, sans-serif
+    - font-size: 16px
+    - transition: all 0.5s ease
+    - box-shadow: |
+        [[[
+          if (states['binary_sensor.droger_actief'].state !== 'off')
+            return '0px 0px 15px 0px rgba(255, 152, 0, 0.3)'; /* Subtiele oranje gloed als hij aan staat */
+          return 'none'; /* Geen gloed als hij uit staat */
+        ]]]
+  grid:
+    - grid-template-areas: |
+        "i program"
+        "n stat2"
+        "bar bar"
+        "stat1 stat3"
+    - grid-template-columns: 1fr 1fr
+    - grid-template-rows: 70px min-content 40px min-content
+  name:
+    - justify-self: start
+    - font-size: 16px
+    - font-weight: 500
+  label:
+    - justify-self: start
+    - font-size: 16px
+    - font-weight: 500
+  icon:
+    - width: 34px
+    - color: |
+        [[[
+          if (states['binary_sensor.droger_actief'].state !== 'off')
+            return '#ff9800'; /* Oranje als de droger draait */
+          return 'var(--contrast20)'; /* Standaard grijs als hij uit staat */
+        ]]]
+    - animation: |
+        [[[
+          if (states['binary_sensor.droger_actief'].state !== 'off')
+            return 'bounce 1.5s ease-in-out infinite, wash 1s ease-in-out infinite';
+          return 'none'; /* Geen animatie als hij uit staat */
+        ]]]
+  img_cell:
+    - justify-self: start
+    - align-self: start
+    - width: 36px
+    - height: 36px
+  custom_fields:
+    program:
+      - justify-self: end
+      - align-self: end
+      - padding-bottom: 6px
+      - font-size: 16px
+      - font-weight: 500
+      - visibility: >
+          [[[ return states['binary_sensor.droger_actief'].state !== 'off' ?
+          'visible' : 'hidden'; ]]]
+    stat1:
+      - justify-self: start
+      - font-size: 12px
+      - opacity: 0.7
+    stat2:
+      - justify-self: end
+      - font-size: 16px
+      - font-weight: 500
+      - visibility: >
+          [[[ return states['binary_sensor.droger_actief'].state !== 'off' ?
+          'visible' : 'hidden'; ]]]
+    stat3:
+      - justify-self: end
+      - font-size: 12px
+      - opacity: 0.7
+    bar:
+      - justify-self: start
+      - width: 100%
+      - border-radius: 6px
+      - background: var(--slider-color, transparent)
+      - height: 16px
+custom_fields:
+  bar: |
+    [[[
+      // Kijk of de wasmachine aan of uit staat
+      var power = states['binary_sensor.droger_actief'] ? states['binary_sensor.droger_actief'].state : 'off';
+
+      // Percentage ophalen en afronden
+      var raw = states['sensor.droger_voortgang'].state;
+      var val = parseFloat(raw);
+      if (isNaN(val)) val = 0;
+      var roundedVal = Math.round(val);
+      if (roundedVal > 100) roundedVal = 100;
+      if (roundedVal < 0) roundedVal = 0;
+
+      // Standaard instellingen (voor als hij aan staat)
+      var barKleur = '#2196f3'; // Blauw
+      if (roundedVal >= 80) barKleur = '#4caf50'; // Groen
+      var achtergrondKleur = 'rgba(255,255,255,0.1)';
+      var animatie = '<div class="soft-sweep"></div>';
+
+      // Instellingen overschrijven als hij UIT staat
+      if (power === 'off' || power === 'unavailable') {
+        barKleur = '#333333'; // Donkergrijs
+        achtergrondKleur = '#333333'; // Achtergrond ook donkergrijs
+        roundedVal = 100; // Vul de hele balk met de grijze kleur
+        animatie = ''; // Geen animatie tonen
+      }
+
+      return `
+      <div style="
+        background: ${achtergrondKleur}; 
+        border-radius: 6px;
+        width: 100%;
+        height: 16px;
+        overflow: hidden;
+        position: relative;
+      ">
+        <div style="
+          background: ${barKleur}; 
+          border-radius: 6px;
+          width: ${roundedVal}%; 
+          height: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          transition: width 0.5s ease, background 0.5s ease;
+        ">
+          ${animatie}
+        </div>
+      </div>`;
+    ]]]
+  program: |
+    [[[
+      var power = states['binary_sensor.droger_actief'].state;
+      var p = states['sensor.droger_programma'].state;
+
+      var names = {
+        "dishcare_dishwasher_program_eco_50": "Eco",
+        "dishcare_dishwasher_program_auto2": "Auto",
+        "dishcare_dishwasher_program_intensiv_70": "Intensief 70°",
+        "dishcare_dishwasher_program_quick_65": "Snel 65°",
+        "dishcare_dishwasher_program_night_wash": "Stil",
+        "dishcare_dishwasher_program_machine_care": "Onderhoud",
+        "dishcare_dishwasher_program_pre_rinse": "Voor spoelen"
+      };
+
+      if (power === 'off') return "Uit";
+      if (!p || p === 'unknown' || p === 'unavailable') return "Idle";
+
+      return names[p] || p;
+    ]]]
+  stat1: ""
+  stat2: |
+    [[[
+      var val = states['sensor.droger_resterende_tijd'].state;
+
+      if (!val || val === "unknown" || val === "unavailable") {
+        return "";
+      }
+
+      // Tijd berekenen met minuten ipv uren
+      var totalMinutes = parseInt(val);
+      if (isNaN(totalMinutes)) return "";
+
+      var now = new Date();
+      now.setMinutes(now.getMinutes() + totalMinutes);
+
+      // Forceer 24-uurs notatie
+      var eindtijd = now.toLocaleTimeString('nl-NL', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: false 
+      });
+
+      return `Klaar om ${eindtijd}`;
+    ]]]
+  stat3: |
+    [[[
+      var power = states['binary_sensor.droger_actief'].state;
+      if (power === 'off') return "Off";
+
+      var p = states['sensor.droger_voortgang'].state;
+
+      if (!p || p === 'unknown' || p === 'unavailable') return "Ready";
+
+      // Geen decimalen meer achter de procenten
+      return Math.round(parseFloat(p)) + "%";
+    ]]]
+card_mod:
+  style: |
+    /* De strakke nieuwe animatie voor in de balk */
+    .soft-sweep {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+      animation: sweep 2s infinite linear;
+    }
+
+    @keyframes sweep {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .pulse-icon {
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: .7; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); opacity: .7; }
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {transform: translateY(0); } 
+      40% { transform: translateY(-1.2px) rotate(5deg); } 
+      60% { transform: translateY(-1.1px) rotate(-4deg); } 
+    } 
+    @keyframes wash {
+      50%  { clip-path: polygon(0 0, 0 100%, 35% 100%, 36% 74%, 31% 43%, 61% 40%, 71% 69%, 62% 78%, 36% 73%, 35% 100%, 100% 100%, 100% 0); }
+    }
